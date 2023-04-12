@@ -21,7 +21,11 @@ plugins {
 }
 
 allprojects {
-  apply plugin: "io.spinnaker.project"
+  apply plugin: 'io.spinnaker.project'
+  repositories {mavenCentral()}
+  tasks.withType(Copy).all {
+    duplicatesStrategy 'exclude'
+  }
 }
 
 subprojects {
@@ -36,13 +40,16 @@ subprojects {
   if (name != "echo-bom") {
     apply plugin: "java-library"
     apply plugin: "groovy"
-    apply plugin: 'jacoco'
+    //apply plugin: 'jacoco'
     apply plugin: 'com.adarshr.test-logger'
 
     test {
       testLogging {
         exceptionFormat = 'full'
       }
+     useJUnitPlatform {
+       includeEngines "junit-vintage", "junit-jupiter"
+     }
     }
 
     tasks.withType(JavaExec) {
@@ -53,11 +60,12 @@ subprojects {
   }
 
   if (name != "echo-bom" && name != "echo-api") {
-    jacoco {
+    /*jacoco {
       toolVersion = '0.8.3'
-    }
+    }*/
 
     dependencies {
+      api("org.apache.groovy:groovy:4.0.9")
       implementation enforcedPlatform("io.spinnaker.kork:kork-bom:$korkVersion")
       annotationProcessor platform("io.spinnaker.kork:kork-bom:$korkVersion")
       annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -65,8 +73,10 @@ subprojects {
       compileOnly "org.projectlombok:lombok"
       annotationProcessor "org.projectlombok:lombok"
       testAnnotationProcessor "org.projectlombok:lombok"
+      implementation "org.apache.groovy:groovy:4.0.9"
+      annotationProcessor "org.projectlombok:lombok"
+      annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-      implementation "org.codehaus.groovy:groovy"
       implementation "com.github.ben-manes.caffeine:guava"
       implementation "com.netflix.spectator:spectator-api"
       implementation "org.slf4j:slf4j-api"
@@ -81,6 +91,7 @@ subprojects {
       testImplementation "org.springframework:spring-test"
       testImplementation "org.hamcrest:hamcrest-core"
       testRuntimeOnly "cglib:cglib-nodep"
+      testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
       testRuntimeOnly "org.objenesis:objenesis"
     }
   }
